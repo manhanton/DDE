@@ -230,31 +230,54 @@ def update_stacked_bar(start_date, end_date):
 #     )
 #     return {'data': data, 'layout': layout}
 
-@app.callback(Output('pareto-chart', 'figure'),
-              [Input('pareto-dropdown', 'value'),
-               Input('date-picker', 'start_date'),
-               Input('date-picker', 'end_date')])
-def update_pareto_chart(selected_desc, start_date, end_date):
-    filtered_df = df[(df['description'] == selected_desc) & (df['test_date_time'] >= start_date) & (df['test_date_time'] <= end_date)]
-    if filtered_df.empty:
-        return {'data': [], 'layout': {}}
-    desc_count = filtered_df['description'].value_counts().tolist()[0]
-    total_count = len(df[df['description'].isin(filtered_df['description'])])
-    pct = desc_count/total_count * 100
+# @app.callback(Output('pareto-chart', 'figure'),
+#               [Input('pareto-dropdown', 'value'),
+#                Input('date-picker', 'start_date'),
+#                Input('date-picker', 'end_date')])
+# def update_pareto_chart(selected_desc, start_date, end_date):
+#     filtered_df = df[(df['description'] == selected_desc) & (df['test_date_time'] >= start_date) & (df['test_date_time'] <= end_date)]
+#     if filtered_df.empty:
+#         return {'data': [], 'layout': {}}
+#     desc_count = filtered_df['description'].value_counts().tolist()[0]
+#     total_count = len(df[df['description'].isin(filtered_df['description'])])
+#     pct = desc_count/total_count * 100
     
-    x = filtered_df['description'].unique()
-    y = filtered_df.groupby('description').size().cumsum()
+#     x = filtered_df['description'].unique()
+#     y = filtered_df.groupby('description').size().cumsum()
+#     trace1 = go.Bar(x=x, y=y, name='Cumulative Count')
+#     trace2 = go.Scatter(x=x, y=y/total_count*100, name='Cumulative Percentage')
+#     trace3 = go.Scatter(x=x, y=[pct]*len(x), name='Selected Description Percentage')
+#     data = [trace1, trace2, trace3]
+#     layout = go.Layout(
+#         title='Pareto Chart',
+#         xaxis={'title': 'Description'},
+#         yaxis={'title': 'Cumulative Count/Percentage'},
+#         hovermode='closest'
+#     )
+#     return {'data': data, 'layout': layout}
+
+@app.callback(
+    Output('pareto-chart', 'figure'),
+    [Input('date-picker', 'start_date'),
+     Input('date-picker', 'end_date')])
+def update_pareto_chart(start_date, end_date):
+    filtered_df = df[(df['test_date_time'] >= start_date) & (df['test_date_time'] <= end_date)]
+    desc_counts = filtered_df.groupby('description')['lot_id'].nunique()
+    total_count = filtered_df['lot_id'].nunique()
+    x = desc_counts.index.tolist()
+    y = desc_counts.tolist()
+    pct = [val/total_count*100 for val in y]
     trace1 = go.Bar(x=x, y=y, name='Cumulative Count')
-    trace2 = go.Scatter(x=x, y=y/total_count*100, name='Cumulative Percentage')
-    trace3 = go.Scatter(x=x, y=[pct]*len(x), name='Selected Description Percentage')
-    data = [trace1, trace2, trace3]
+    trace2 = go.Scatter(x=x, y=pct, name='Cumulative Percentage')
     layout = go.Layout(
         title='Pareto Chart',
         xaxis={'title': 'Description'},
         yaxis={'title': 'Cumulative Count/Percentage'},
         hovermode='closest'
     )
-    return {'data': data, 'layout': layout}
+    return {'data': [trace1, trace2], 'layout': layout}
+
+
 
 
 if __name__ == '__main__':

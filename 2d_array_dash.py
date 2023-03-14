@@ -65,21 +65,31 @@ def update_output_div(lot_id, wafer_id):
         # Set the wafer_id value to the first value in the options if no value is selected
         wafer_id = df[(df['lot_id'] == lot_id) & (df['pass_fail_flag'] == 'F')]['wafer_id'].unique()[0]
     # Select the rows with the specified lot_id and wafer_id
-    df_selected = df[(df['lot_id'] == lot_id) & (df['wafer_id'] == wafer_id)]            
+    df_selected = df[(df['lot_id'] == lot_id) & (df['wafer_id'] == wafer_id)]
+    
+    # Check if there are any NaN values in the die_x and die_y columns, and replace them with 0 if necessary
+    if df_selected['die_x'].isna().any():
+        df_selected.loc[df_selected['die_x'].isna(), 'die_x'] = 0
+    if df_selected['die_y'].isna().any():
+        df_selected.loc[df_selected['die_y'].isna(), 'die_y'] = 0
+    
     # Get the maximum values of die_x and die_y
-    x_max = df_selected['die_x'].astype(int).max()
-    y_max = df_selected['die_y'].astype(int).max()
+    x_max = round(df_selected['die_x'].max())
+    y_max = round(df_selected['die_y'].max())
     # Create a numpy array of zeros to represent the grid
     grid = np.zeros((y_max+1, x_max+1), dtype=int)
     # Fill in the grid with the values from pass_fail_flag
     for i, row in df_selected.iterrows():
-        x = int(row['die_x'])
-        y = int(row['die_y'])
+        x = int(round(row['die_x']))
+        y = int(round(row['die_y']))
         if row['pass_fail_flag'] == 'P':
             grid[y, x] = 0
         else:
-            grid[y, x] = 1          
-            
+            grid[y, x] = 1
+
+
+
+
     # Create a heatmap trace to display the grid data
     heatmap = go.Heatmap(z=grid[::-1], colorscale=[[0, 'green'], [1, 'red']])
     # Create the layout for the plot

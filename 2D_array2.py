@@ -6,7 +6,9 @@ df = pd.read_csv('https://raw.githubusercontent.com/manhanton/DDE/main/AOI_ATBK_
 
 # Define the lot_id and wafer_id values
 lot_id = 'N0PC04EGY000'
-wafer_ids = list(df['wafer_id'].unique())  # Add any wafer_id values here
+# wafer_ids = list(df[df['lot_id']==lot_id]['wafer_id'].unique()) 
+wafer_ids = df[(df['lot_id'] == lot_id) & (df['pass_fail_flag'] == 'F')]['wafer_id'].unique()
+
 
 # Loop over the wafer_id values
 for wafer_id in wafer_ids:
@@ -37,6 +39,9 @@ for wafer_id in wafer_ids:
                 print('_', end=' ')
         print()
     # Count the total number of 'F' values in the pass_fail_flag column
-    f_count = df_selected['pass_fail_flag'].value_counts()['F']
-    print('Total F:', f_count)
+    f_count = df_selected['pass_fail_flag'].value_counts().get('F', 0)
+    if f_count == 0:
+        print('Total F:',f_count)
+    else:
+        print('Total F:', f_count)
     print('-------------------------------')

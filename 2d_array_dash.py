@@ -93,12 +93,22 @@ def update_output_div(lot_id, wafer_id):
     # Create a heatmap trace to display the grid data
     heatmap = go.Heatmap(z=grid[::-1], colorscale=[[0, 'green'], [1, 'red']])
     # Create the layout for the plot
+#     layout = go.Layout(
+#         xaxis=dict(range=[0, x_max], autorange=False),
+#         yaxis=dict(range=[0, y_max], autorange=False, scaleanchor="x", scaleratio=1),
+#         margin=dict(l=50, r=50, b=50, t=50),
+#         height=500
+#     )
+    
     layout = go.Layout(
-        xaxis=dict(range=[0, x_max], autorange=False),
-        yaxis=dict(range=[0, y_max], autorange=False, scaleanchor="x", scaleratio=1),
-        margin=dict(l=50, r=50, b=50, t=50),
-        height=500
+    xaxis=dict(range=[0, x_max], autorange=False, dtick=1), # Add dtick=1
+    yaxis=dict(range=[0, y_max], autorange=False, scaleanchor="x", scaleratio=1, dtick=1), # Add dtick=1
+    margin=dict(l=50, r=50, b=50, t=50),
+    height=500
     )
+
+    
+    
     # Create the figure for the plot
     fig = go.Figure(data=[heatmap], layout=layout)
     # Count the total number of 'F' values in the pass_fail_flag column

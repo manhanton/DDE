@@ -6,8 +6,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 # Read the data from the CSV file
-df = pd.read_csv('https://raw.githubusercontent.com/manhanton/DDE/main/AOI_ATBK_KMI700E_FEB23.csv')
-
+# df = pd.read_csv('https://raw.githubusercontent.com/manhanton/DDE/main/AOI_ATBK_KMI700E_FEB23.csv')
+df = pd.read_csv('part-00000-5eaa3dcb-db9b-49f4-baac-602e5f9baaa8-c000.csv')
 # Get the unique lot_id values in the data
 lot_ids = df['lot_id'].unique()
 

@@ -15,16 +15,11 @@ df['test_date_time'] = pd.to_datetime(df['test_date_time'])
 # Convert the description column to string
 df['description'] = df['description'].astype(str)
 
+# Get the unique lot_id values in the data
+lot_ids = df['lot_id'].unique()
+
 # Create the app
 app = dash.Dash(__name__)
-
-
-
-#     dcc.Graph(id='stacked-bar'),
-#     dcc.Dropdown(id='pareto-dropdown',
-#                  options=[{'label': i, 'value': i} for i in df['description'].unique()],
-#                  value=df['description'].unique()[0]),
-#     dcc.Graph(id='pareto-chart')
 
 
 # Define the layout of the app
@@ -39,12 +34,31 @@ app.layout = html.Div([
         display_format='MMM Do, YY'
     ),
     dcc.Graph(id='stacked-bar'),
-    dcc.Graph(id='pareto-chart')
+    dcc.Graph(id='pareto-chart'),
+    dcc.Dropdown(
+        id='lot-dropdown',
+        options=[{'label': str(lot_id), 'value': lot_id} for lot_id in lot_ids],
+        value=lot_ids[0],
+        searchable=True,
+        search_value='',
+        placeholder='Select a lot_id...',
+        clearable=False
+    ),
+    dcc.Dropdown(
+        id='wafer-dropdown',
+        value=None
+    ),
+    # Define the plot for displaying the grid data
+    dcc.Graph(
+        id='grid-plot'
+    ),
+    # Define the text for displaying the total number of 'F' values in the pass_fail_flag column
+    html.Div(id='f-text')
 ])
 
+# ------------------------------------------------------------------------------------------------------------
 
 
-# Define the callback function for the stacked bar chart
 @app.callback(Output('stacked-bar', 'figure'),
               [Input('date-picker', 'start_date'),
                Input('date-picker', 'end_date')])
@@ -64,7 +78,6 @@ def update_stacked_bar(start_date, end_date):
     fig = go.Figure(data=traces)
     fig.update_layout(barmode='stack', xaxis={'tickangle': 45, 'type': 'category'}, yaxis={'title': 'Count'})
     return fig
-
 
 
 @app.callback(
@@ -88,44 +101,7 @@ def update_pareto_chart(start_date, end_date):
     )
     return {'data': [trace1, trace2], 'layout': layout}
 
-########################################################################################################
 
-# Get the unique lot_id values in the data
-lot_ids = df['lot_id'].unique()
-
-# Create the dash app
-app = dash.Dash(__name__)
-
-# Define the layout of the app
-app.layout = html.Div(children=[
-    html.H1(children='Grid Dashboard'),
-    html.Div(children='''
-        A dashboard to display the grid data.
-    '''),
-    # Define the dropdown menu for selecting the lot_id value
-    dcc.Dropdown(
-        id='lot-dropdown',
-        options=[{'label': str(lot_id), 'value': lot_id} for lot_id in lot_ids],
-        value=lot_ids[0],
-        searchable=True,
-        search_value='',
-        placeholder='Select a lot_id...',
-        clearable=False
-    ),
-    # Define the dropdown menu for selecting the wafer_id value
-    dcc.Dropdown(
-        id='wafer-dropdown',
-        value=None
-    ),
-    # Define the plot for displaying the grid data
-    dcc.Graph(
-        id='grid-plot'
-    ),
-    # Define the text for displaying the total number of 'F' values in the pass_fail_flag column
-    html.Div(id='f-text')
-])
-
-# Define the callback function for updating the wafer-dropdown based on the selected lot_id value
 @app.callback(
     dash.dependencies.Output('wafer-dropdown', 'options'),
     [dash.dependencies.Input('lot-dropdown', 'value')]
@@ -136,8 +112,7 @@ def update_wafer_dropdown(lot_id):
     # Return the options for the wafer-dropdown
     return [{'label': str(wafer_id), 'value': wafer_id} for wafer_id in wafer_ids]
 
-    
-# Define the callback function for updating the plot and text based on the selected lot_id and wafer_id values
+
 @app.callback(
     [dash.dependencies.Output('wafer-dropdown', 'value'), dash.dependencies.Output('grid-plot', 'figure'), dash.dependencies.Output('f-text', 'children')],
     [dash.dependencies.Input('lot-dropdown', 'value'), dash.dependencies.Input('wafer-dropdown', 'value')]
@@ -170,8 +145,6 @@ def update_output_div(lot_id, wafer_id):
             grid[y, x] = 1
 
 
-
-
     # Create a heatmap trace to display the grid data
     heatmap = go.Heatmap(z=grid[::-1], colorscale=[[0, 'green'], [1, 'red']])
     # Create the layout for the plot
@@ -200,8 +173,6 @@ def update_output_div(lot_id, wafer_id):
     # Return the updated values for the wafer-dropdown, grid-plot, and f-text
     return wafer_id, fig, f_text
 
-
-
-
+    
 if __name__ == '__main__':
     app.run_server(debug=True)

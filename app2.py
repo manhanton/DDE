@@ -18,14 +18,23 @@ df['description'] = df['description'].astype(str)
 # Create the app
 app = dash.Dash(__name__)
 
-
-
+# Define the layout of the app
+# app.layout = html.Div([
+#     dcc.DatePickerRange(
+#         id='date-picker',
+#         min_date_allowed=df['test_date_time'].min(),
+#         max_date_allowed=df['test_date_time'].max(),
+#         initial_visible_month=df['test_date_time'].min(),
+#         start_date=df['test_date_time'].min(),
+#         end_date=df['test_date_time'].max(),
+#         display_format='MMM Do, YY'
+#     ),
 #     dcc.Graph(id='stacked-bar'),
 #     dcc.Dropdown(id='pareto-dropdown',
 #                  options=[{'label': i, 'value': i} for i in df['description'].unique()],
 #                  value=df['description'].unique()[0]),
 #     dcc.Graph(id='pareto-chart')
-
+# ])
 
 # Define the layout of the app
 app.layout = html.Div([

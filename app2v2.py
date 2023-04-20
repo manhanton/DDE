@@ -18,23 +18,6 @@ df['description'] = df['description'].astype(str)
 # Create the app
 app = dash.Dash(__name__)
 
-# Define the layout of the app
-# app.layout = html.Div([
-#     dcc.DatePickerRange(
-#         id='date-picker',
-#         min_date_allowed=df['test_date_time'].min(),
-#         max_date_allowed=df['test_date_time'].max(),
-#         initial_visible_month=df['test_date_time'].min(),
-#         start_date=df['test_date_time'].min(),
-#         end_date=df['test_date_time'].max(),
-#         display_format='MMM Do, YY'
-#     ),
-#     dcc.Graph(id='stacked-bar'),
-#     dcc.Dropdown(id='pareto-dropdown',
-#                  options=[{'label': i, 'value': i} for i in df['description'].unique()],
-#                  value=df['description'].unique()[0]),
-#     dcc.Graph(id='pareto-chart')
-# ])
 
 # Define the layout of the app
 app.layout = html.Div([
@@ -48,6 +31,7 @@ app.layout = html.Div([
         display_format='MMM Do, YY'
     ),
     dcc.Graph(id='stacked-bar'),
+    dcc.Graph(id='stacked-bar-chart'),
     dcc.Graph(id='pareto-chart')
 ])
 
@@ -73,6 +57,26 @@ def update_stacked_bar(start_date, end_date):
     fig = go.Figure(data=traces)
     fig.update_layout(barmode='stack', xaxis={'tickangle': 45, 'type': 'category'}, yaxis={'title': 'Count'})
     return fig
+
+
+
+# Define a function to create a stacked bar chart
+def create_stacked_bar_chart2(start_date, end_date):
+    filtered_df = df.loc[start_date:end_date]
+    filtered_df = filtered_df[filtered_df['pass_fail_flag'] == 'F']
+    grouped_df = filtered_df.groupby(['tester_id', 'description', 'pass_fail_flag'])['tester_id'].count().reset_index(name='count')
+    fig = px.bar(grouped_df, x='tester_id', y='count', color='description', title='Failures by Tester ID')
+    fig.update_layout(barmode='stack', xaxis_title='Tester ID', yaxis_title='Count')
+    return fig
+
+
+@app.callback(Output('stacked-bar-chart', 'figure'),
+              Input('date-picker', 'start_date'),
+              Input('date-picker', 'end_date'))
+def update_stacked_bar_chart2(start_date, end_date):
+    fig = create_stacked_bar_chart2(start_date, end_date)
+    return fig
+
 
 
 
